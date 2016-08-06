@@ -15,6 +15,4 @@ Using Mahalanobis distances we create three visualizations:
 
 
 Authors:
-Nazareno Andrade
-Mustafa K
-Maria Panteli
+Nazareno Andrade, Mustafa K, Maria Panteli
