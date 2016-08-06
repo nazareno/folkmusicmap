@@ -1,32 +1,46 @@
 
-nv.addGraph(function() {
-  var chart = nv.models.scatterChart()
-                .showDistX(true)    //showDist, when true, will display those little distribution lines on the axis.
-                .showDistY(true)
-                .transitionDuration(350)
-                .color(d3.scale.category10().range());
+// load asynrously
+d3.json("song_info.json", function(json) {
+  data = read_tsne_json(json);
 
-  //Configure how the tooltip looks.
-  chart.tooltipContent(function(key) {
-      return '<h3>' + key + '</h3>';
-  });
 
-  //Axis settings
-  chart.xAxis.tickFormat(d3.format('.02f'));
-  chart.yAxis.tickFormat(d3.format('.02f'));
-
-  //We want to show shapes other than circles.
-  chart.scatter.onlyCircles(false);
-
-  var myData = randomData(4,40);
-  d3.select('#chart svg')
-      .datum(myData)
-      .call(chart);
-
-  nv.utils.windowResize(chart.update);
-
-  return chart;
+  add_graph(data);
 });
+
+function add_graph(data) {
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+                  .showDistX(true)    //showDist, when true, will display those little distribution lines on the axis.
+                  .showDistY(true)
+                  .transitionDuration(350)
+                  .color(d3.scale.category10().range());
+
+    //Configure how the tooltip looks.
+    chart.tooltipContent(function(key) {
+        return '<h3>' + key + '</h3>';
+    });
+
+    //Axis settings
+    chart.xAxis.tickFormat(d3.format('.02f'));
+    chart.yAxis.tickFormat(d3.format('.02f'));
+
+    //We want to show shapes other than circles.
+    chart.scatter.onlyCircles(false);
+
+
+    // Random data
+    // var data = randomData(4,40);
+
+    d3.select('#chart svg')
+        .datum(data)
+        .call(chart);
+
+    nv.utils.windowResize(chart.update);
+    return chart;
+
+  });
+}
+
 
 
 /**************************************
@@ -53,5 +67,38 @@ function randomData(groups, points) { //# groups,# points per group
     }
   }
 
+  return data;
+}
+
+
+
+function read_tsne_json(json) {
+
+  var data = [];
+  var shapes = ['circle'];
+
+  var groups = {};
+
+  json.forEach(function(song, i) {
+    if (!groups[song.region]) {
+      console.log("adding region: " + song.region);
+      // add group
+      groups[song.region] = {key: song.region,
+                             values: []};
+    }
+
+    groups[song.region].values.push({
+       x: song.x,
+       y: song.y,
+       size: 1,
+       shape: "circle"
+    });
+  });
+
+  for (var key in groups) {
+    data.push(groups[key]);
+  }
+
+  the_data = data;
   return data;
 }
