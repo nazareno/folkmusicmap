@@ -1,32 +1,49 @@
 
-nv.addGraph(function() {
-  var chart = nv.models.scatterChart()
-                .showDistX(true)    //showDist, when true, will display those little distribution lines on the axis.
-                .showDistY(true)
-                .transitionDuration(350)
-                .color(d3.scale.category10().range());
+// load asynrously
+d3.json("song_info.json", function(json) {
+  data = read_tsne_json(json);
 
-  //Configure how the tooltip looks.
-  chart.tooltipContent(function(key) {
-      return '<h3>' + key + '</h3>';
-  });
-
-  //Axis settings
-  chart.xAxis.tickFormat(d3.format('.02f'));
-  chart.yAxis.tickFormat(d3.format('.02f'));
-
-  //We want to show shapes other than circles.
-  chart.scatter.onlyCircles(false);
-
-  var myData = randomData(4,40);
-  d3.select('#chart svg')
-      .datum(myData)
-      .call(chart);
-
-  nv.utils.windowResize(chart.update);
-
-  return chart;
+  add_graph(data);
+  d3.selectAll(".nv-point").on("click", function(e) {console.log(JSON.stringify(e));});
 });
+
+
+function add_graph(data) {
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+                  .showDistX(false)    //showDist, when true, will display those little distribution lines on the axis.
+                  .showDistY(false)
+                  .transitionDuration(350)
+                  .forceY([-30,30])
+                  .forceX([-30,30])
+                  .color(d3.scale.category10().range());
+
+    //Configure how the tooltip looks.
+    chart.tooltipContent(function(key, x, y) {
+        return '<h3>' + key + " "+ x + " " + y +';</h3>';
+    });
+
+    //Axis settings
+    chart.xAxis.tickFormat(d3.format('.02f'));
+    chart.yAxis.tickFormat(d3.format('.02f'));
+
+    //We want to show shapes other than circles.
+    chart.scatter.onlyCircles(true);
+
+
+    // Random data
+    // var data = randomData(4,40);
+
+    d3.select('#chart svg')
+        .datum(data)
+        .call(chart);
+
+    nv.utils.windowResize(chart.update);
+    return chart;
+
+  });
+}
+
 
 
 /**************************************
@@ -53,5 +70,41 @@ function randomData(groups, points) { //# groups,# points per group
     }
   }
 
+  return data;
+}
+
+
+
+function read_tsne_json(json) {
+
+  var data = [];
+  var shapes = ['circle'];
+
+  var groups = {};
+
+  json.forEach(function(song, i) {
+    // group_by = song.region;
+    group_by = song.region;
+    if (!groups[group_by]) {
+      console.log("adding region: " + group_by);
+      // add group
+      groups[group_by] = {key: group_by,
+                             values: []};
+    }
+
+    groups[group_by].values.push({
+       x: song.x,
+       y: song.y,
+       size: song.Distance,
+       shape: "circle",
+       audio_url: song.SampleAudio
+    });
+  });
+
+  for (var key in groups) {
+    data.push(groups[key]);
+  }
+
+  the_data = data;
   return data;
 }
