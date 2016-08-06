@@ -1,3 +1,9 @@
+---
+title: "A network of folks"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
 library(ggplot2)
 library(readr)
 library(dplyr, warn.conflicts = FALSE)
@@ -71,7 +77,11 @@ p = p %>%
   filter(!(paste(to, from) %in% known))
 
 nodes$tooltip = paste0(nodes$Country, ", ", nodes$Year, " (", nodes$CatalogNumber, ")")
+```
 
+Songs connected to their closest neighbour. Click to play.
+
+```{r, echo = FALSE}
 fn = forceNetwork(Links = p, Nodes = nodes, Source = "from_index",
              Target = "to_index", Value = "distance", NodeID = "tooltip", 
              fontFamily = "sans-serif", Group = "group", opacity = 0.8, zoom = TRUE, linkColour = "lightgrey", 
@@ -79,70 +89,6 @@ fn = forceNetwork(Links = p, Nodes = nodes, Source = "from_index",
 fn$x$nodes = left_join(fn$x$nodes, metadata, by = c("name" = "CatalogNumber"))
 fn$x$options$clickAction = 'new Audio(d.SampleAudio).play()'
 fn
-# ----------------
-# T-SNE
-# ----------------
-tsne_raw = Rtsne(features, 
-                 perplexity = 30,
-                 max_iter = 500,
-                 verbose = TRUE,
-                 check_duplicates = FALSE)
 
-tsnedf = as.data.frame(tsne_raw$Y)
-#tsnedf = as.data.frame(tsne_raw_long$Y)
-ggplot(tsnedf, aes(x = V1, y = V2, color = metadata$region)) + 
-  geom_point(alpha = 0.7, size = 2) + 
-  theme_bw()
+```
 
-library(scatterD3)
-scatterD3(tsnedf$V1, tsnedf$V2, 
-          #lab = metadata$CatalogNumber,
-          col_var = metadata$region,
-          xlab = "PC1", ylab = "PC2", col_lab = "Region", 
-          lasso = TRUE)
-
-to_export = metadata
-to_export$x = tsnedf$V1
-to_export$y = tsnedf$V2
-library(jsonlite)
-write(toJSON(to_export), "song_info.json")
-
-# ----------------
-# PCA
-# ----------------
-# install_github("vqv/ggbiplot")
-library(ggbiplot)
-
-pr.out = prcomp(features) 
-
-pr.out$rotation
-biplot(pr.out, scale = 0)
-
-autoplot(pr.out, label = TRUE, label.size = 3, shape = FALSE, alpha = .4)
-
-autoplot(pr.out, label = FALSE, label.size = 3, shape = TRUE, 
-         alpha = 0.5,loadings = TRUE, loadings.colour = 'blue',
-         loadings.label = TRUE, loadings.label.size = 3)
-
-ggbiplot(pr.out, obs.scale = 1, var.scale = 1,
-         groups = metadata$Outlier, ellipse = FALSE, circle = TRUE, alpha = .3) +
-  scale_color_discrete(name = '') +
-  theme(legend.direction = 'horizontal', legend.position = 'top')
-
-plot_pve <- function(prout){
-  pr.var <- pr.out$sdev^2
-  pve <- pr.var / sum(pr.var)
-  df = data.frame(x = 1:NROW(pve), y = cumsum(pve))
-  ggplot(df, aes(x = x, y = y)) + 
-    geom_point(size = 3) + 
-    geom_line() + 
-    labs(x='Principal Component', y = 'Cumuative Proportion of Variance Explained')
-}
-
-plot_pve(pr.out)
-
-tsne_raw_long = Rtsne(features, 
-                 perplexity = 10,
-                 max_iter = 1000,
-                 verbose = TRUE,
-                 check_duplicates = FALSE)
