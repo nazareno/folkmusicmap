@@ -76,8 +76,10 @@ fn = forceNetwork(Links = p, Nodes = nodes, Source = "from_index",
              fontSize = 21)
 fn$x$nodes = left_join(fn$x$nodes, metadata, by = c("name" = "CatalogNumber"))
 fn$x$options$clickAction = 'new Audio(d.SampleAudio).play()'
-fn$x$nodes$name = paste0(fn$x$nodes$Country, ", ", fn$x$nodes$Year, " (", fn$x$nodes$CatalogNumber, ")")
+fn$x$nodes$name = paste0(fn$x$nodes$Country, ", ", fn$x$nodes$Year)
 fn
+write(fn, "folks-network.html")
+
 # ----------------
 # T-SNE
 # ----------------
