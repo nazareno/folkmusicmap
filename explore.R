@@ -70,14 +70,13 @@ known = paste(p$from, p$to)
 p = p %>% 
   filter(!(paste(to, from) %in% known))
 
-nodes$tooltip = paste0(nodes$Country, ", ", nodes$Year, " (", nodes$CatalogNumber, ")")
-
 fn = forceNetwork(Links = p, Nodes = nodes, Source = "from_index",
-             Target = "to_index", Value = "distance", NodeID = "tooltip", 
+             Target = "to_index", Value = "distance", NodeID = "CatalogNumber", 
              fontFamily = "sans-serif", Group = "group", opacity = 0.8, zoom = TRUE, linkColour = "lightgrey", 
              fontSize = 21)
 fn$x$nodes = left_join(fn$x$nodes, metadata, by = c("name" = "CatalogNumber"))
 fn$x$options$clickAction = 'new Audio(d.SampleAudio).play()'
+fn$x$nodes$name = paste0(fn$x$nodes$Country, ", ", fn$x$nodes$Year, " (", fn$x$nodes$CatalogNumber, ")")
 fn
 # ----------------
 # T-SNE
