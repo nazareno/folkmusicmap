@@ -1,5 +1,5 @@
-# folkmusicmap
-A non-geographical map to travel through folk music
+# folkviz
+Three visualizations to travel through folk music
 
 We explore similarity in a set of 2170 recordings (70 recordings from each of 31 countries). 
 Recordings are described by a feature vector capturing rhythmic, melodic, harmonic and timbral aspects. 
